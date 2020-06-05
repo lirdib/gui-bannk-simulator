@@ -12,7 +12,7 @@ def one_hour_invest(a):
     if int(read_bal) > 0:
         n=func.name+"date.txt"
         func.balance =  int(func.read_bal)-50
-    invest_button=Button(a,text="Invest",command=lambda:date.chekck_for_file(a,n,type_of_invest))
+    invest_button=Button(a,text="Invest",command=lambda:func.chekck_for_file(a,type_of_invest))
     invest_button.grid(row=1,column=1)
     fi.close()
 
