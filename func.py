@@ -47,7 +47,9 @@ def Login(x):
     login = Button(x, text ="Login",command=lambda:get_name_pass(x))
     login.grid(row=7, column=0)
 
-
+def return_name(string):
+    return string
+name= ' '
 def get_name_pass(x):
     global fname
     global name
@@ -168,7 +170,7 @@ def calculations(type):
 
 def read_balance():
     global n
-    n = name + "balance.txt"
+    n = ee.get() + "balance.txt"
     f=open(n,'r')
     current_balance=f.readline()
     f.close()
@@ -180,3 +182,23 @@ def write_balance(bal):
     f = open(n, 'w')
     f.write(str(bal))
     f.close()
+
+name_one = name+ ",dateone.txt"
+name_two =  name+ ",datesix.txt"
+name_three= name+ ",datetwelve.txt"
+def chekck_for_file(a,type):
+    if os.path.isfile(name_one)or os.path.isfile(name_two) or os.path.isfile(name_three):
+        destroy(a)
+        investment.invest(a)
+    else:
+        if type=='o':
+            n = name + ",dateone.txt"
+            date.write_date(a, type)
+        if type=='s':
+            n = name + ",datesix.txt"
+            date.write_date(a, type)
+        if type=='t':
+            n = name + ",datetwelve.txt"
+            date.write_date(a, type)
+        else:
+            inner_menu(a)
