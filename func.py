@@ -1,5 +1,6 @@
 from tkinter import *
 from PIL import ImageTk,Image
+from tkinter import messagebox
 
 from datetime import datetime as dt
 import os.path
@@ -26,11 +27,11 @@ def Si(x):#This function is shown when user clicks sing in button in main bank m
     global Lpass
     Lpass = Label(x, text="Ju lutem shkruani passwordin")
     Lpass.grid(row=4,column=0)
-    global p
+
     p = Entry(x)
     p.grid(row=5,column=0)
     global sigin
-    sigin=Button(x,text="Sign in",command=lambda:file(x,e)) #function at line 93
+    sigin=Button(x,text="Sign in",command=lambda:file(x,e,p)) #function at line 93
     sigin.grid(row=6,column=0)
 
 
@@ -81,24 +82,39 @@ def get_name_pass(x): #This function is called inside Login function. This is us
             read_bal = read_balance()
             inner_menu(x)#Function at line 126
     else:
-        print("error")
+        response = messagebox.askyesno("Error", "Name or password not correct. Clik yes to try again or No no return back to main menu")
+        if response == 1:
+            ee.delete('0','end')
+            pp.delete('0','end')
+        elif response ==0:
+            bank_menu(x)
 
 
 
-def file(root,e): #This functions creates 2 new texts files when users signs in; one which writes users balance(which name is user name + "balance.txt") and another file where it writes username and password
+
+def file(root,e,p): #This functions creates 2 new texts files when users signs in; one which writes users balance(which name is user name + "balance.txt") and another file where it writes username and password
+
     a=e.get()
     b=p.get()
     fname = e.get() + ".txt"
-    f = open(fname, "w")
-    f.write(a)
-    f.write(".")
-    f.write(b)
-    f.close()
-    balance_name = e.get() + "balance.txt"
-    fil = open(balance_name, "w")
-    fil.write(str(balance))
-    fil.close()
-    bank_menu(root)
+    if os.path.isfile(fname):
+        response = messagebox.askyesno("Error", "User already registered. Clik yes to try again or No no return back to main menu")
+        if response == 1:
+            e.delete('0','end')
+            p.delete('0','end')
+        elif response ==0:
+            bank_menu(root)
+    else:
+        f = open(fname, "w")
+        f.write(a)
+        f.write(".")
+        f.write(b)
+        f.close()
+        balance_name = e.get() + "balance.txt"
+        fil = open(balance_name, "w")
+        fil.write(str(balance))
+        fil.close()
+        bank_menu(root)
 
 
 
@@ -125,7 +141,8 @@ def bank_menu(a):# This is the main bank function it show the bank menu where yo
 
 def inner_menu(a): # This function is used to display inner bank menu, by which is meant the menu which displays afet the user is loged in
     destroy(a)
-    l=Label(a,text="Welcome to bank menu")
+    currBal= read_balance()
+    l=Label(a,text="Welcome to bank menu " + name+"             Your balance is: "+ currBal)
     l.grid(row=0,column=0)
     investemnt=Button(a,text="Invest",padx=40,command=lambda:investment.invest(a)) # Function at investment file, line 44
     withdraw_from_investment=Button(a,text="Withdraw money from investment",command=lambda:withdraw_money_from_invest(a)) # Function at line 144
@@ -137,7 +154,7 @@ def destroy(a): # This is a simple function called at same new pages to clear th
         widget.destroy()
 
 
-
+print()
 
 
 
@@ -146,18 +163,26 @@ def withdraw_money_from_invest(a):
     l = Label(a, text="from which investment do you want to withdraw moneys")
     l.grid(row=0,column=1)
     nje = Button(a, text="1 hour",command=lambda:one_hour_withdraw(a))
-    two = Button(a, text="6hours")
+    two = Button(a, text="6hours",command=lambda:six_hour_withdraw(a))
     three = Button(a, text="One day")
     nje.grid(row=1, column=0)
     two.grid(row=1, column=1)
     three.grid(row=1, column=2)
 
-def one_hour_withdraw(a):
 
+def one_hour_withdraw(a):
     type= 'o'
     destroy(a)
     b=Button(a,text="Clcik me",command=lambda:calculations(type))
     b.grid(row=0,column=0)
+
+
+def six_hour_withdraw(a):
+    type= 's'
+    destroy(a)
+    b=Button(a,text="Clcik me",command=lambda:calculations(type))
+    b.grid(row=0,column=0)
+
 
 def calculations(type):
 
@@ -165,8 +190,8 @@ def calculations(type):
     s = int(n.second)
     m = int(n.minute)
     o = int(n.hour)
-    date.read_date()
-    time =date.read_date()
+
+    time =date.read_date(type)
     seconds = time[0]
     minutes = time[1]
     hour = time[2]
@@ -191,9 +216,14 @@ def calculations(type):
 
     if type=='o':
         if ho >= 1:
-
             c_b=read_balance()
             c_b = int(c_b)+200
+            write_balance(c_b)
+            os.remove(name+"dateone.txt")
+    if type=='s':
+        if ho >= 6:
+            c_b=read_balance()
+            c_b = int(c_b)+400
             write_balance(c_b)
 
 
@@ -204,7 +234,7 @@ def read_balance():
     f=open(n,'r')
     current_balance=f.readline()
     f.close()
-    print(current_balance)
+
     return current_balance
 
 def write_balance(bal):
@@ -213,9 +243,9 @@ def write_balance(bal):
     f.write(str(bal))
     f.close()
 
-name_one = name+ ",dateone.txt"
-name_two =  name+ ",datesix.txt"
-name_three= name+ ",datetwelve.txt"
+name_one = name+ "dateone.txt"
+name_two =  name+ "datesix.txt"
+name_three= name+ "datetwelve.txt"
 
 def chekck_for_file(a,type):
     if os.path.isfile(name_one)or os.path.isfile(name_two) or os.path.isfile(name_three):
@@ -223,13 +253,13 @@ def chekck_for_file(a,type):
         investment.invest(a)
     else:
         if type=='o':
-            n = name + ",dateone.txt"
+            n = name + "dateone.txt"
             date.write_date(a, n)
         if type=='s':
-            n = name + ",datesix.txt"
-            date.write_date(a, name_two)
+            n = name + "datesix.txt"
+            date.write_date(a, n)
         if type=='t':
-            n = name + ",datetwelve.txt"
-            date.write_date(a, name_three)
+            n = name + "datetwelve.txt"
+            date.write_date(a, n)
         else:
             inner_menu(a)
